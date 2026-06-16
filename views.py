@@ -41,16 +41,6 @@ def dashboard(request):
     one_year = today - timedelta(days=365)
     editor_role_id = Role.objects.get(name="Editor").id
 
-    # categories = request.GET.get("categories", [])
-    # if len(categories):
-    #     form = CategorySelectForm(request.GET)
-    #     journal_ids = JournalCategory.objects.filter(category__in=categories)\
-    #                                          .values_list("journal__pk", flat=True)\
-    #                                          .distinct()
-    #     journals = Journal.objects.filter(pk__in=journal_ids)
-    # else:
-    #     form = CategorySelectForm()
-
     default_settings = {
         x: y for x, y in SettingValue.objects.filter(
                             journal=None,
@@ -148,7 +138,7 @@ def dashboard(request):
                 "annual_peer_reviewed": annual_peer_reviewed,
                 "cadence": cadence,
                 "publication_frequency": publication_frequency,
-                "categories": ", ".join(j.journalcategory_set.values_list('category__label', flat=True))
+                "categories": j.journalcategory_set.values_list('category__label', flat=True)
             }
             
             results.append(values)
