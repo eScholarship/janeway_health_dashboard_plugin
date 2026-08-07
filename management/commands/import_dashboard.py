@@ -38,10 +38,9 @@ class Command(BaseCommand):
         ]
 
         with open(import_file, mode="r") as f:
-            reader = csv.DictReader(f)
+            reader = csv.DictReader(f, delimiter="\t")
 
             for row in reader:
-                print(row)
                 if Journal.objects.filter(code=row["id"]):
                     j = Journal.objects.get(code=row["id"])
                     for c in categories:
@@ -59,8 +58,8 @@ class Command(BaseCommand):
                             journal=j,
                             category=category
                         )
-                    if "Publication Frequency" in row:
-                        freq = row["Publication Frequency"]
+                    if "Publication Frequency Target" in row:
+                        freq = row["Publication Frequency Target"]
                         if "Yearly" in freq:
                             self.update_frequency(j, 1)
                         elif "Biannually" in freq:
