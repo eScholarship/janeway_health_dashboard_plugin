@@ -32,7 +32,7 @@
             <tbody>
             {% for r in results %}
                 <tr>
-                    <td><a href="{{ r.journal.site_url }}">{{ r.journal.name }}</a></td>
+                    <td><a href="{{ r.journal.site_url }}{% url 'core_dashboard' %}">{{ r.journal.name }}</a></td>
                     <td>
                         <ul>
                             {% for c in r.categories %}
@@ -59,7 +59,7 @@
                     <td>
                         {% if r.total_reviews_stalled > 0 %}
                             <div class="callout alert">
-                                {{ r.total_reviews_stalled }}
+                                {{ r.total_reviews_stalled }} of {{ r.total_in_review }}
                             </div>
                         {% else %}
                             {{ r.total_reviews_stalled }}
@@ -68,7 +68,7 @@
                     <td>
                         {% if r.total_stalled > 0 %}
                             <div class="callout alert">
-                                {{ r.total_stalled }}
+                                {{ r.total_stalled }} of {{ r.total_incomplete }}
                             </div>
                         {% else %}
                             {{ r.total_stalled }}

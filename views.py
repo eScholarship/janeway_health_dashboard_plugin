@@ -13,7 +13,7 @@ from core.models import Role, SettingValue
 from submission.models import Article
 
 from .plugin_settings import PLUGIN_NAME
-from .models import JournalCategory
+from .models import JournalCategory, Category
 from .forms import CategorySelectForm
 
 incomplete_stages = ["Assigned",
@@ -133,7 +133,9 @@ def dashboard(request):
                 "last_editor": last_editor,
                 "days_since_login": days_since_login,
                 "login_threshold": login_threshold,
+                "total_in_review": Article.objects.filter(journal=j, stage="Under Review",).count(),
                 "total_reviews_stalled": stalled_after_reviews,
+                "total_incomplete": incomplete_articles.count(),
                 "total_stalled": total_stalled,
                 "annual_peer_reviewed": annual_peer_reviewed,
                 "cadence": cadence,
@@ -145,5 +147,6 @@ def dashboard(request):
 
     context = {'plugin_name': PLUGIN_NAME,
                #'form': form,
-               'results': results}
+               'results': results,
+               'all_categories': Category.objects.all()}
     return render(request, template, context)
