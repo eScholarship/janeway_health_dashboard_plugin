@@ -9,3 +9,7 @@ Janeway plugin that displays key journal health indicators
 - Stalled articles: Number of articles in incomplete stages that have been there more than `threshold_stalled_days`
 - Annual peer-reviewed articles: Count of peer-reviewed articles published in the last year (flagged less than 5)
 - Issues in last year: Total issues published in the last year (flagged if less than `publication_frequency`)
+
+## License
+
+[BSD 3-Clause](LICENSE)

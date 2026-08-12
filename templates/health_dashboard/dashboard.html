@@ -32,8 +32,14 @@
             <tbody>
             {% for r in results %}
                 <tr>
-                    <td><a href="{{ r.journal.site_url }}">{{ r.journal.name }}</a></td>
-                    <td>{{ r.categories }}</td>
+                    <td><a href="{{ r.journal.site_url }}{% url 'core_dashboard' %}">{{ r.journal.name }}</a></td>
+                    <td>
+                        <ul>
+                            {% for c in r.categories %}
+                                <li>{{ c }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
                     <td>{{ r.publication_frequency }}</td>
                     <td>
                         {% if r.total_unassigned > 0 %}
@@ -53,7 +59,7 @@
                     <td>
                         {% if r.total_reviews_stalled > 0 %}
                             <div class="callout alert">
-                                {{ r.total_reviews_stalled }}
+                                {{ r.total_reviews_stalled }} of {{ r.total_in_review }}
                             </div>
                         {% else %}
                             {{ r.total_reviews_stalled }}
@@ -62,7 +68,7 @@
                     <td>
                         {% if r.total_stalled > 0 %}
                             <div class="callout alert">
-                                {{ r.total_stalled }}
+                                {{ r.total_stalled }} of {{ r.total_incomplete }}
                             </div>
                         {% else %}
                             {{ r.total_stalled }}
@@ -89,6 +95,19 @@
                 </tr>
             {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <th>Journal</th>
+                    <th>Categories</th>
+                    <th>Expected issues per year</th>
+                    <th>Stale unassigned articles</th>
+                    <th>Last editor login</th>
+                    <th>Articles stalled after reviews</th>
+                    <th>Stalled articles</th>
+                    <th>Annual peer-reviewed articles</th>
+                    <th>Issues in last year</th>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>
@@ -100,15 +119,39 @@
 <script src="//cdn.datatables.net/searchbuilder/1.8.4/js/dataTables.searchBuilder.js"></script>
 <script src="https://cdn.datatables.net/searchbuilder/1.8.4/js/searchBuilder.dataTables.js"></script>
 <script>
-    $('#dashboard').DataTable( {
-        paging: false,
-        layout: {
-            top1: {
-                searchBuilder: {
-                    columns: [0, 1]
-                }
-            }
+    new DataTable('#dashboard', {
+        "paging": false,
+        initComplete: function () {
+            this.api()
+                .columns([1])
+                .every(function () {
+                    let column = this;
+
+                    let select = document.createElement('select');
+                    select.add(new Option(''));
+                    column.footer().replaceChildren(select);
+
+                    select.addEventListener('change', function () {
+                        column
+                            .search(select.value, {caseInsensitive: false})
+                            .draw();
+                    });
+
+                    data = $.map(column.data(), function(d){
+                        return $('<ul>')
+                            .html(d)
+                            .find('li')
+                            .map(function() {
+                                return $(this).text().trim();
+                            })
+                        .get();
+                    });
+
+                    [...new Set(data)].sort().forEach(function(choice) {
+                        select.add(new Option(choice));
+                    });
+                });
         }
-    } );
+    });
 </script>
 {% endblock %}

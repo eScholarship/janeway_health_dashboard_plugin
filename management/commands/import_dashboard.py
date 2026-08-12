@@ -16,6 +16,14 @@ class Command(BaseCommand):
             "import_file", help="path to a csv file containing journal info", type=str
         )
 
+    def update_frequency(self, journal, freq):
+        save_setting(
+            "plugin:health_dashboard",
+            "publication_frequency",
+            journal,
+            freq
+        )
+
     def handle(self, *args, **options):
         import_file = options.get("import_file")
         categories = [
@@ -26,25 +34,17 @@ class Command(BaseCommand):
             "Practitioner Journal",
             "Proceedings",
             "Non-Traditional Publication",
-            "OJC Journal",
+            "OJC Title",
         ]
 
         with open(import_file, mode="r") as f:
-            reader = csv.DictReader(f)
+            reader = csv.DictReader(f, delimiter="\t")
 
             for row in reader:
-                print(row)
                 if Journal.objects.filter(code=row["id"]):
                     j = Journal.objects.get(code=row["id"])
-                    if row["Exclude from Reports and Dashboards"] != "TRUE":
-                        save_setting(
-                            "plugin:health_dashboard",
-                            "dashboard_include",
-                            j,
-                            "on"
-                        )
                     for c in categories:
-                        if row[c] == "TRUE" or row[c] == "Yes":
+                        if row[c].strip() == "TRUE":
                             category, _ = Category.objects.get_or_create(label=c)
                             JournalCategory.objects.get_or_create(
                                 journal=j,
@@ -58,4 +58,16 @@ class Command(BaseCommand):
                             journal=j,
                             category=category
                         )
+                    if "Publication Frequency Target" in row:
+                        freq = row["Publication Frequency Target"]
+                        if "Yearly" in freq:
+                            self.update_frequency(j, 1)
+                        elif "Biannually" in freq:
+                            self.update_frequency(j, 2)
+                        elif "Triannually" in freq:
+                            self.update_frequency(j, 3)
+                        elif "Quarterly" in freq:
+                            self.update_frequency(j, 4)
+                else:
+                    print(f"Journal not found {row['id']}")
 
